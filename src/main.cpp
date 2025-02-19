@@ -17,5 +17,9 @@ int main() {
     std::getline(std::cin,input);
     std::cout << input << ": command not found" << std::endl;
   }
+
+  std::cout << "$ ";
+  std::getline(std::cin, input);
+  std::cout << input << ": command not found" << std::endl;
   return 0;
 }
