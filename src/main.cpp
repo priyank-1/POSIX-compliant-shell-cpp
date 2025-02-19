@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <string_view>
+#include <unordered_set>
 
 int main()
 {
@@ -14,11 +15,13 @@ int main()
 
   // Uncomment this block to pass the first stage
   // std::cout << "$ ";
+  std::unordered_set<std::string> builtins = {"echo","exit","type"};
 
-  std::string input;
+std::string input;
   // std::getline(std::cin, input);
   // std::cout << input << ": command not found" << std::endl;
 
+  
   while (true)
   {
     std::cout << "$ ";
@@ -32,6 +35,18 @@ int main()
     if (input.starts_with("echo "))
     { 
       std::cout << std::string_view(input).substr(5) << '\n';
+      continue;
+    }
+
+    if(input.starts_with("type "))
+    {
+      std::string cmd = input.substr(5);
+      if(builtins.find(cmd) != builtins.end()){
+        std::cout << cmd << " is a shell builtin\n";
+      }
+      else{
+        std::cout << cmd << ": not found\n";
+      }
       continue;
     }
 
