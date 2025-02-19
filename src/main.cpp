@@ -60,7 +60,7 @@ int main()
           std::string cmd_path = token + "/" + cmd;
           if (access(cmd_path.c_str(), X_OK) == 0)
           {
-            std::cout << cmd << " is" << cmd_path << std::endl;
+            std::cout << cmd << " is " << cmd_path << std::endl;
             found = true;
             break; // break to find only first executable path
           }
