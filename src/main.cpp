@@ -15,11 +15,10 @@ int main() {
   while(true){
     std::cout << "$ ";
     std::getline(std::cin,input);
+    if(input == "exit 0") exit(0);
     std::cout << input << ": command not found" << std::endl;
   }
 
-  std::cout << "$ ";
-  std::getline(std::cin, input);
-  std::cout << input << ": command not found" << std::endl;
-  return 0;
+ 
+  // return 0;
 }
