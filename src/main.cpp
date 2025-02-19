@@ -22,7 +22,7 @@ int main() {
       std::cout << input.substr(0,5) << std::endl;
       continue;
     }
-    std::cout << input << ": command not found" << std::endl;
+    else std::cout << input << ": command not found" << std::endl;
   }
 
  
