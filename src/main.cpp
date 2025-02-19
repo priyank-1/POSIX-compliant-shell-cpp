@@ -20,7 +20,7 @@ int main() {
     std::string input;
 
     while (true) {
-        std::cout << "$ ";
+      std::cout << "$ " << std::flush;
         std::getline(std::cin, input);
 
         if (input == "exit 0") {
