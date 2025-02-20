@@ -73,8 +73,8 @@ int main() {
         }
 
         if(input.starts_with("cd ")){
-            std::string path = input.substr(3);
-            std::string current_path(path);
+            // std::string path = input.substr(3);
+            std::string current_path(input.substr(3));
             
            if(access(current_path.c_str(),F_OK)==0)
             chdir(current_path.c_str());
