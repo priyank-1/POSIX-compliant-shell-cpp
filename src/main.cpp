@@ -75,6 +75,14 @@ int main() {
         if(input.starts_with("cd ")){
             // std::string path = input.substr(3);
             std::string current_path(input.substr(3));
+
+            if(current_path.starts_with("..")){
+                std::string temp_path(current_path.substr(3));
+                if(chdir(temp_path.c_str())!=0){
+                    std::cout<<"cd: "<<temp_path<<": No such file or directory\n";
+                }
+                continue;
+            }
             
            if(access(current_path.c_str(),F_OK)==0)
             chdir(current_path.c_str());
