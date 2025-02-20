@@ -7,7 +7,7 @@
 #include <cstdlib>  // For getenv()
 #include <unistd.h> // For fork(), execvp(), access()
 #include <sys/wait.h> // For waitpid()
-#include <direct.h> // For getcwd()
+// #include <direct.h> // For getcwd() = windows only
 
 int main() {
     // Optimize I/O
