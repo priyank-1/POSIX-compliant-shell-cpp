@@ -72,6 +72,13 @@ int main() {
             continue;
         }
 
+        if(input.starts_with("cd ")){
+            std::string path = input.substr(3);
+            std::string current_path;
+            std::chdir(path.c_str());
+            continue;
+        }
+
 
         // Handle external commands (program execution)
         std::stringstream ss(input);
