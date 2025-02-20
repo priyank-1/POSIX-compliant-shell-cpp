@@ -64,12 +64,14 @@ int main() {
             const size_t size = 1024;
             char buffer[size];
             if(getcwd(buffer,size)!=nullptr){
-                std::cout<<buffer<<std::endl;
+                std::cout<<buffer<< "/" <<input<<std::endl;
             }
             else {
                 std::cerr<<"Error: Failed to get current working directory\n";
             }
+            continue;
         }
+
 
         // Handle external commands (program execution)
         std::stringstream ss(input);
