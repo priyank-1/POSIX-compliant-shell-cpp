@@ -75,7 +75,7 @@ int main() {
         if(input.starts_with("cd ")){
             std::string path = input.substr(3);
             std::string current_path;
-            std::chdir(path.c_str());
+            chdir(path.c_str());
             continue;
         }
 
