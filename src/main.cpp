@@ -36,10 +36,10 @@ void handleCd(const std::string& input) {
         const char* home = getenv("HOME");
         if(home != nullptr){
             if(chdir(home)!=0)
-            std::perror<<"Error: Failed to change directory to home\n";
+            std::perror("chdir");
         }
         else{
-            std::perror<<"Error: Failed to get home directory\n";
+            std::perror("getenv");
         }
     } else if (path == "..") {
         if (chdir("..") != 0) {
