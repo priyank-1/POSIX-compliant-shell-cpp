@@ -16,7 +16,7 @@ int main() {
     std::cout.tie(nullptr);
 
     // Built-in commands
-    std::unordered_set<std::string> builtins = {"echo", "exit", "type"};
+    std::unordered_set<std::string> builtins = {"echo", "exit", "type","pwd"};
 
     std::string input;
 
