@@ -83,7 +83,7 @@ int main() {
                 }
                 continue;
             }
-            else if(current_path = "~") continue;
+            else if(current_path == "~") continue;
             else{
                 current_path = current_path.starts_with(".") ? current_path.substr(2) : current_path;
                 if(access(current_path.c_str(),F_OK)==0)
