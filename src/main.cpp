@@ -7,7 +7,141 @@
 #include <cstdlib>  // For getenv()
 #include <unistd.h> // For fork(), execvp(), access()
 #include <sys/wait.h> // For waitpid()
-// #include <direct.h> // For getcwd() = windows only
+// #include <pwd.h> // For getting home directory
+
+// Built-in commands
+std::unordered_set<std::string> builtins = {"echo", "exit", "type", "pwd", "cd"};
+
+// Function to handle `echo` command
+void handleEcho(const std::string& input) {
+    std::cout << std::string_view(input).substr(5) << '\n';
+}
+
+// Function to handle `pwd` command
+void handlePwd() {
+    const size_t size = 1024;
+    char buffer[size];
+    if (getcwd(buffer, size) != nullptr) {
+        std::cout << buffer << std::endl;
+    } else {
+        std::cerr << "Error: Failed to get current working directory\n";
+    }
+}
+
+// Function to handle `cd` command
+void handleCd(const std::string& input) {
+    std::string path = input.substr(3); 
+
+    if (path == "~") {
+        const char* home = getenv("HOME");
+        if(home != nullptr){
+            if(chdir(home)!=0)
+            std::perror<<"Error: Failed to change directory to home\n";
+        }
+        else{
+            std::perror<<"Error: Failed to get home directory\n";
+        }
+    } else if (path == "..") {
+        if (chdir("..") != 0) {
+            std::perror("chdir");
+        }
+    } else {
+        if (access(path.c_str(), F_OK) == 0) {
+            if (chdir(path.c_str()) != 0) {
+                std::perror("chdir");
+            }
+        } else {
+            std::cout << "cd: " << path << ": No such file or directory\n";
+        }
+    }
+}
+
+// Function to handle `type` command
+void handleType(const std::string& input) {
+    std::string cmd = input.substr(5);
+
+    if (builtins.find(cmd) != builtins.end()) {
+        std::cout << cmd << " is a shell builtin\n";
+        return;
+    }
+
+    const char* path = std::getenv("PATH");
+    if (path != nullptr) {
+        std::stringstream ss(path);
+        std::string token;
+        while (std::getline(ss, token, ':')) {
+            std::string cmd_path = token + "/" + cmd;
+            if (access(cmd_path.c_str(), X_OK) == 0) {
+                std::cout << cmd << " is " << cmd_path << std::endl;
+                return;
+            }
+        }
+    }
+
+    std::cout << cmd << ": not found\n";
+}
+
+// Function to execute external commands
+void executeCommand(const std::string& input) {
+    std::stringstream ss(input);
+    std::vector<std::string> args;
+    std::string arg;
+
+    while (ss >> arg) {
+        args.push_back(arg);
+    }
+
+    if (args.empty()) return;
+
+    std::string cmd = args[0];
+    const char* path = std::getenv("PATH");
+    if (path == nullptr) {
+        std::cout << cmd << ": not found\n";
+        return;
+    }
+
+    std::string executablePath;
+    std::stringstream path_ss(path);
+    std::string dir;
+    bool found = false;
+
+    while (std::getline(path_ss, dir, ':')) {
+        std::string full_path = dir + "/" + cmd;
+        if (access(full_path.c_str(), X_OK) == 0) {
+            executablePath = full_path;
+            found = true;
+            break;
+        }
+    }
+
+    if (!found) {
+        std::cout << cmd << ": not found\n";
+        return;
+    }
+
+    // Convert vector<string> to vector<char*>
+    std::vector<char*> argv;
+    for (const auto& arg : args) {
+        argv.push_back(const_cast<char*>(arg.c_str()));
+    }
+    argv.push_back(nullptr);
+
+    // Fork and execute command
+    pid_t pid = fork();
+    if (pid < 0) {
+        std::cerr << "Error: Failed to fork process\n";
+        return;
+    }
+
+    if (pid == 0) {
+        execvp(executablePath.c_str(), argv.data());
+        std::cerr << cmd << ": command not found\n";
+        exit(1);
+    } else {
+        int status;
+        waitpid(pid, &status, 0);
+    }
+}
 
 int main() {
     // Optimize I/O
@@ -15,13 +149,10 @@ int main() {
     std::cin.tie(nullptr);
     std::cout.tie(nullptr);
 
-    // Built-in commands
-    std::unordered_set<std::string> builtins = {"echo", "exit", "type","pwd"};
-
     std::string input;
 
     while (true) {
-      std::cout << "$ " << std::flush;
+        std::cout << "$ " << std::flush;
         std::getline(std::cin, input);
 
         if (input == "exit 0") {
@@ -29,133 +160,27 @@ int main() {
         }
 
         if (input.starts_with("echo ")) {
-            std::cout << std::string_view(input).substr(5) << '\n';
+            handleEcho(input);
             continue;
         }
 
         if (input.starts_with("type ")) {
-            std::string cmd = input.substr(5);
-            if (builtins.find(cmd) != builtins.end()) {
-                std::cout << cmd << " is a shell builtin\n";
-                continue;
-            }
-            const char* path = std::getenv("PATH"); // Getting PATH environment variable
-            if (path != nullptr) { // If PATH exists
-                std::string path_str(path);
-                std::stringstream ss(path_str);
-                std::string token;
-                bool found = false;
-                while (std::getline(ss, token, ':')) { // Tokenize PATH directories
-                    std::string cmd_path = token + "/" + cmd;
-                    if (access(cmd_path.c_str(), X_OK) == 0) { // Check if executable
-                        std::cout << cmd << " is " << cmd_path << std::endl;
-                        found = true;
-                        break; // Stop after finding first match
-                    }
-                }
-                if (!found) std::cout << cmd << ": not found\n";
-            } else {
-                std::cout << cmd << ": not found\n";
-            }
+            handleType(input);
             continue;
         }
 
-        if(input == "pwd"){
-            const size_t size = 1024;
-            char buffer[size];
-            if(getcwd(buffer,size)!=nullptr){
-                std::cout<<buffer<<std::endl;
-            }
-            else {
-                std::cerr<<"Error: Failed to get current working directory\n";
-            }
+        if (input == "pwd") {
+            handlePwd();
             continue;
         }
 
-        if(input.starts_with("cd ")){
-            // std::string path = input.substr(3);
-            std::string current_path(input.substr(3));
-
-            if(current_path.starts_with("..")){
-                std::string temp_path(current_path.substr(3));
-                if(chdir(temp_path.c_str())!=0){
-                    std::cout<<"cd: "<<temp_path<<": No such file or directory\n";
-                }
-                continue;
-            }
-            else if(current_path == "~") continue;
-            else{
-                current_path = current_path.starts_with(".") ? current_path.substr(2) : current_path;
-                if(access(current_path.c_str(),F_OK)==0)
-                 chdir(current_path.c_str());
-                 else 
-                 std::cout << "cd: " << current_path << ": No such file or directory\n";
-                 continue;
-            }
-           
-        }
-
-
-        // Handle external commands (program execution)
-        std::stringstream ss(input);
-        std::vector<std::string> args;
-        std::string arg;
-        
-        while (ss >> arg) { 
-            args.push_back(arg);
-        }
-        
-        if (args.empty()) continue; 
-        
-        std::string cmd = args[0];
-        
-        const char* path = std::getenv("PATH");
-        if (path == nullptr) {
-            std::cout << cmd << ": not found\n";
+        if (input.starts_with("cd ")) {
+            handleCd(input);
             continue;
         }
 
-        std::string executablePath;
-        std::stringstream path_ss(path);
-        std::string dir;
-        bool found = false;
-
-        while (std::getline(path_ss, dir, ':')) { 
-            std::string full_path = dir + "/" + cmd;
-            if (access(full_path.c_str(), X_OK) == 0) {
-                executablePath = full_path;
-                found = true;
-                break;
-            }
-        }
-
-        if (!found) {
-            std::cout << cmd << ": not found\n";
-            continue;
-        }
-
-        // logic for fork and child process execution
-        std::vector<char*> argv;
-        for (const auto& arg : args) {
-            argv.push_back(const_cast<char*>(arg.c_str())); 
-        }
-        argv.push_back(nullptr); 
-       
-        pid_t pid = fork();
-
-        if (pid < 0) { 
-            std::cerr << "Error: Failed to fork process\n";
-            continue;
-        }
-
-        if (pid == 0) { 
-            execvp(executablePath.c_str(), argv.data());
-            std::cerr << cmd << ": command not found\n"; 
-            exit(1);
-        } else { 
-            int status;
-            waitpid(pid, &status, 0);
-        }
+        // Execute external command
+        executeCommand(input);
     }
 
     return 0;
