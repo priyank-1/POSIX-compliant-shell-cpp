@@ -7,6 +7,7 @@
 #include <cstdlib>  // For getenv()
 #include <unistd.h> // For fork(), execvp(), access()
 #include <sys/wait.h> // For waitpid()
+#include <direct.h> // For getcwd()
 
 int main() {
     // Optimize I/O
@@ -59,6 +60,17 @@ int main() {
             continue;
         }
 
+        if(input == "pwd"){
+            const size_t size = 1024;
+            char buffer[size];
+            if(getcwd(buffer,size)!=nullptr){
+                std::cout<<buffer<<std::endl;
+            }
+            else {
+                std::cerr<<"Error: Failed to get current working directory\n";
+            }
+        }
+
         // Handle external commands (program execution)
         std::stringstream ss(input);
         std::vector<std::string> args;
@@ -97,6 +109,7 @@ int main() {
             continue;
         }
 
+        // logic for fork and child process execution
         std::vector<char*> argv;
         for (const auto& arg : args) {
             argv.push_back(const_cast<char*>(arg.c_str())); 
