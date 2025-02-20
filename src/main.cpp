@@ -83,12 +83,16 @@ int main() {
                 }
                 continue;
             }
-            
-           if(access(current_path.c_str(),F_OK)==0)
-            chdir(current_path.c_str());
-            else 
-            std::cout << "cd: " << current_path << ": No such file or directory\n";
-            continue;
+            else if(current_path = "~") continue;
+            else{
+                current_path = current_path.starts_with(".") ? current_path.substr(2) : current_path;
+                if(access(current_path.c_str(),F_OK)==0)
+                 chdir(current_path.c_str());
+                 else 
+                 std::cout << "cd: " << current_path << ": No such file or directory\n";
+                 continue;
+            }
+           
         }
 
 
