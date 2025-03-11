@@ -13,46 +13,36 @@ using namespace std;
 std::unordered_set<std::string> builtins = {"echo", "exit", "type", "pwd", "cd", "cat"};
 
 // Function to handle `echo` command
-void handleEcho(const std::string &input)
-{
+void handleEcho(const std::string& input) {
     std::string_view view = input;
-    if (view.size() > 5)
-    {
 
-        if (view.substr(5).starts_with("'"))
-        {
+    if (view.size() > 5) {
+        if (view.substr(5).starts_with("'")) {  // Handling single-quoted input
             int start = 6, end = start;
-            while (end < view.size() && view[end] != '\'')
-                ++end;
-            if (end < view.size())
-            {
-                cout << view.substr(start, end - start) << '\n';
+            while (end < view.size() && view[end] != '\'') ++end;
+
+            if (end < view.size()) {  // If closing quote exists
+                std::cout << view.substr(start, end - start) << '\n';
                 return;
             }
-        }
-        else
-        {
+        } else {  // Handling normal space-separated words
             int start = 5, end = start;
-            //   cout << "\"" ;
             bool firstWord = true;
-            while (end < view.size())
-            {
-                while (end < view.size() && view[end] != ' ')
-                    end++;
-                if (!firstWord)
-                    cout << ' ';
-                cout << view.substr(start, end - start);
-                while (end < view.size() && view[end] == ' ')
-                    end++;
+
+            while (end < view.size()) {
+                while (end < view.size() && view[end] != ' ') end++;  // Find word end
+                
+                if (!firstWord) std::cout << ' ';  // Ensure single space between words
+                std::cout << view.substr(start, end - start);
+
+                while (end < view.size() && view[end] == ' ') end++;  // Skip extra spaces
                 start = end;
                 firstWord = false;
-                +
             }
-            cout << '\n';
+            std::cout << '\n';  // Print newline after processing
             return;
         }
     }
-    // std::cout << std::string_view(input).substr(5) << '\n';
 }
 
 // Function to handle `pwd` command
