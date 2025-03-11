@@ -26,15 +26,15 @@ void handleEcho(const std::string& input) {
            }
         }
         else if(view.size() > 5){
-          int start = 6, end = start;
-          cout << "\"" ;
+          int start = 5, end = start;
+        //   cout << "\"" ;
           while(end < view.size()){
                 while(end < view.size() && view[end] != ' ') end++;
                 cout << view.substr(start,end-start) << ' ';
                 while(end < view.size() && view[end] == ' ') end++;
                 start = end;
             }
-          cout << "\"" << '\n';
+        //   cout << "\"" << '\n';
     }
 
     }
