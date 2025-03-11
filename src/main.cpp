@@ -14,15 +14,14 @@ std::unordered_set<std::string> builtins = {"echo", "exit", "type", "pwd", "cd"}
 
 // Function to handle `echo` command
 void handleEcho(const std::string& input) {
-    if(string_view(input).substr(5).starts_with("'")){
-        int start = 0 , end = 0;
-        for(int i = 5; i<input.size();i++){
-            if(input[i] == "\'"){
-                end = i ;
-                break;
-            }
-        }
-        cout << string_view(input).substr(5,end-5) << '\n';
+    std::string_view view = input;
+    if(view.size() > 5 && view.substr(5).starts_with("'")){
+        int start = 6 , end = start;
+        while(end < view.size() && view[end] != '\'') ++end;
+       if(end < view.size()){
+        cout << view.substr(start,end-start) <<'\n';
+        return;
+       }
     }
     std::cout << std::string_view(input).substr(5) << '\n';
 }
