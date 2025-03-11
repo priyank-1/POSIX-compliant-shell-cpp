@@ -8,12 +8,22 @@
 #include <unistd.h> // For fork(), execvp(), access()
 #include <sys/wait.h> // For waitpid()
 // #include <pwd.h> // For getting home directory
-
+using namespace std;
 // Built-in commands
 std::unordered_set<std::string> builtins = {"echo", "exit", "type", "pwd", "cd"};
 
 // Function to handle `echo` command
 void handleEcho(const std::string& input) {
+    if(string_view(input).substr(5).starts_with("'")){
+        int start = 0 , end = 0;
+        for(int i = 5; i<input.size();i++){
+            if(input[i] == "\'"){
+                end = i ;
+                break;
+            }
+        }
+        cout << string_view(input).substr(5,end-5) << '\n';
+    }
     std::cout << std::string_view(input).substr(5) << '\n';
 }
 
