@@ -8,11 +8,49 @@
 #include <unistd.h>   // For fork(), execvp(), access()
 #include <sys/wait.h> // For waitpid()
 // #include <pwd.h> // For getting home directory
+#include <fstream>
 using namespace std;
 // Built-in commands
 std::unordered_set<std::string> builtins = {"echo", "exit", "type", "pwd", "cd", "cat"};
 
 // Function to handle `echo` command
+vector<string> get_path(const string& input){
+    string_view view = input;
+    vector<string>paths;
+    int i = 5;
+    for(;i<view.size();i++){
+        if(view[i]=='\''){
+            int end = i+1;
+            while(view[end] != '\''){
+                end++;
+            }
+            paths.push_back(s.substr(i,end-i));
+            i = end;
+        }
+    }
+    return paths;
+}
+
+void handleCat(const std::string &input)
+{
+    std::string_view view = input.substr(4);
+    vector<string>paths = get_path(view);
+    for(auto str : paths){
+        ifstream file(str);
+        if(file.is_open()){
+            string line;
+            while(getline(file,line)){
+                cout << line <<' ';
+            }
+        }
+        else{
+            cout << "cat: " << str << ": No such file or directory\n";
+        }
+    }
+    
+    
+}
+
 void handleEcho(const std::string &input)
 {
     std::string_view view = input;
@@ -263,6 +301,10 @@ int main()
         if (input.starts_with("cd "))
         {
             handleCd(input);
+            continue;
+        }
+        if(input.starts_with("cat ")){
+            handleCat(input);
             continue;
         }
 
