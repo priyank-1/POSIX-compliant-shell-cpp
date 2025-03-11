@@ -33,7 +33,7 @@ vector<string> get_path(const string& input){
 
 void handleCat(const std::string &input)
 {
-    std::string_view view = input.substr(4);
+    std::string view = input.substr(4);
     vector<string>paths = get_path(view);
     for(auto str : paths){
         ifstream file(str);
