@@ -28,17 +28,21 @@ void handleEcho(const std::string& input) {
         else if(view.size() > 5){
           int start = 5, end = start;
         //   cout << "\"" ;
+            bool firstWord = true;
           while(end < view.size()){
                 while(end < view.size() && view[end] != ' ') end++;
+                if(!firstWord) cout << ' ';
                 cout << view.substr(start,end-start) << ' ';
                 while(end < view.size() && view[end] == ' ') end++;
                 start = end;
+                firstWord = false;+
             }
-        //   cout << "\"" << '\n';
+          cout << '\n';
+          return;
     }
 
     }
-    std::cout << std::string_view(input).substr(5) << '\n';
+    // std::cout << std::string_view(input).substr(5) << '\n';
 }
 
 // Function to handle `pwd` command
