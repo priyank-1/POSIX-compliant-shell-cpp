@@ -4,8 +4,8 @@
 #include <sstream>
 #include <unordered_set>
 #include <vector>
-#include <cstdlib>  // For getenv()
-#include <unistd.h> // For fork(), execvp(), access()
+#include <cstdlib>    // For getenv()
+#include <unistd.h>   // For fork(), execvp(), access()
 #include <sys/wait.h> // For waitpid()
 // #include <pwd.h> // For getting home directory
 using namespace std;
@@ -13,93 +13,125 @@ using namespace std;
 std::unordered_set<std::string> builtins = {"echo", "exit", "type", "pwd", "cd", "cat"};
 
 // Function to handle `echo` command
-void handleEcho(const std::string& input) {
+void handleEcho(const std::string &input)
+{
     std::string_view view = input;
-    if(view.size() > 5){
+    if (view.size() > 5)
+    {
 
-        if(view.substr(5).starts_with("'")){
-            int start = 6 , end = start;
-            while(end < view.size() && view[end] != '\'') ++end;
-           if(end < view.size()){
-            cout << view.substr(start,end-start) <<'\n';
-            return;
-           }
-        }
-        else if(view.size() > 5){
-          int start = 5, end = start;
-        //   cout << "\"" ;
-            bool firstWord = true;
-          while(end < view.size()){
-                while(end < view.size() && view[end] != ' ') end++;
-                if(!firstWord) cout << ' ';
-                cout << view.substr(start,end-start) << ' ';
-                while(end < view.size() && view[end] == ' ') end++;
-                start = end;
-                firstWord = false;+
+        if (view.substr(5).starts_with("'"))
+        {
+            int start = 6, end = start;
+            while (end < view.size() && view[end] != '\'')
+                ++end;
+            if (end < view.size())
+            {
+                cout << view.substr(start, end - start) << '\n';
+                return;
             }
-          cout << '\n';
-          return;
-    }
-
+        }
+        else
+        {
+            int start = 5, end = start;
+            //   cout << "\"" ;
+            bool firstWord = true;
+            while (end < view.size())
+            {
+                while (end < view.size() && view[end] != ' ')
+                    end++;
+                if (!firstWord)
+                    cout << ' ';
+                cout << view.substr(start, end - start);
+                while (end < view.size() && view[end] == ' ')
+                    end++;
+                start = end;
+                firstWord = false;
+                +
+            }
+            cout << '\n';
+            return;
+        }
     }
     // std::cout << std::string_view(input).substr(5) << '\n';
 }
 
 // Function to handle `pwd` command
-void handlePwd() {
+void handlePwd()
+{
     const size_t size = 1024;
     char buffer[size];
-    if (getcwd(buffer, size) != nullptr) {
+    if (getcwd(buffer, size) != nullptr)
+    {
         std::cout << buffer << std::endl;
-    } else {
+    }
+    else
+    {
         std::cerr << "Error: Failed to get current working directory\n";
     }
 }
 
 // Function to handle `cd` command
-void handleCd(const std::string& input) {
-    std::string path = input.substr(3); 
+void handleCd(const std::string &input)
+{
+    std::string path = input.substr(3);
 
-    if (path == "~") {
-        const char* home = getenv("HOME");
-        if(home != nullptr){
-            if(chdir(home)!=0)
-            std::perror("chdir");
+    if (path == "~")
+    {
+        const char *home = getenv("HOME");
+        if (home != nullptr)
+        {
+            if (chdir(home) != 0)
+                std::perror("chdir");
         }
-        else{
+        else
+        {
             std::perror("getenv");
         }
-    } else if (path == "..") {
-        if (chdir("..") != 0) {
+    }
+    else if (path == "..")
+    {
+        if (chdir("..") != 0)
+        {
             std::perror("chdir");
         }
-    } else {
-        if (access(path.c_str(), F_OK) == 0) {
-            if (chdir(path.c_str()) != 0) {
+    }
+    else
+    {
+        if (access(path.c_str(), F_OK) == 0)
+        {
+            if (chdir(path.c_str()) != 0)
+            {
                 std::perror("chdir");
             }
-        } else {
+        }
+        else
+        {
             std::cout << "cd: " << path << ": No such file or directory\n";
         }
     }
 }
 
 // Function to handle `type` command
-void handleType(const std::string& input) {
+void handleType(const std::string &input)
+{
     std::string cmd = input.substr(5);
 
-    if (builtins.find(cmd) != builtins.end()) {
+    if (builtins.find(cmd) != builtins.end())
+    {
         std::cout << cmd << " is a shell builtin\n";
         return;
     }
 
-    const char* path = std::getenv("PATH");
-    if (path != nullptr) {
+    const char *path = std::getenv("PATH");
+    if (path != nullptr)
+    {
         std::stringstream ss(path);
         std::string token;
-        while (std::getline(ss, token, ':')) {
+        while (std::getline(ss, token, ':'))
+        {
             std::string cmd_path = token + "/" + cmd;
-            if (access(cmd_path.c_str(), X_OK) == 0) {
+            if (access(cmd_path.c_str(), X_OK) == 0)
+            {
                 std::cout << cmd << " is " << cmd_path << std::endl;
                 return;
             }
@@ -110,20 +142,24 @@ void handleType(const std::string& input) {
 }
 
 // Function to execute external commands
-void executeCommand(const std::string& input) {
+void executeCommand(const std::string &input)
+{
     std::stringstream ss(input);
     std::vector<std::string> args;
     std::string arg;
 
-    while (ss >> arg) {
+    while (ss >> arg)
+    {
         args.push_back(arg);
     }
 
-    if (args.empty()) return;
+    if (args.empty())
+        return;
 
     std::string cmd = args[0];
-    const char* path = std::getenv("PATH");
-    if (path == nullptr) {
+    const char *path = std::getenv("PATH");
+    if (path == nullptr)
+    {
         std::cout << cmd << ": not found\n";
         return;
     }
@@ -133,45 +169,54 @@ void executeCommand(const std::string& input) {
     std::string dir;
     bool found = false;
 
-    while (std::getline(path_ss, dir, ':')) {
+    while (std::getline(path_ss, dir, ':'))
+    {
         std::string full_path = dir + "/" + cmd;
-        if (access(full_path.c_str(), X_OK) == 0) {
+        if (access(full_path.c_str(), X_OK) == 0)
+        {
             executablePath = full_path;
             found = true;
             break;
         }
     }
 
-    if (!found) {
+    if (!found)
+    {
         std::cout << cmd << ": not found\n";
         return;
     }
 
     // Convert vector<string> to vector<char*>
-    std::vector<char*> argv;
-    for (const auto& arg : args) {
-        argv.push_back(const_cast<char*>(arg.c_str()));
+    std::vector<char *> argv;
+    for (const auto &arg : args)
+    {
+        argv.push_back(const_cast<char *>(arg.c_str()));
     }
     argv.push_back(nullptr);
 
     // Fork and execute command
     pid_t pid = fork();
-    if (pid < 0) {
+    if (pid < 0)
+    {
         std::cerr << "Error: Failed to fork process\n";
         return;
     }
 
-    if (pid == 0) {
+    if (pid == 0)
+    {
         execvp(executablePath.c_str(), argv.data());
         std::cerr << cmd << ": command not found\n";
         exit(1);
-    } else {
+    }
+    else
+    {
         int status;
         waitpid(pid, &status, 0);
     }
 }
 
-int main() {
+int main()
+{
     // Optimize I/O
     std::ios::sync_with_stdio(false);
     std::cin.tie(nullptr);
@@ -179,30 +224,36 @@ int main() {
 
     std::string input;
 
-    while (true) {
+    while (true)
+    {
         std::cout << "$ " << std::flush;
         std::getline(std::cin, input);
 
-        if (input == "exit 0") {
+        if (input == "exit 0")
+        {
             break;
         }
 
-        if (input.starts_with("echo ")) {
+        if (input.starts_with("echo "))
+        {
             handleEcho(input);
             continue;
         }
 
-        if (input.starts_with("type ")) {
+        if (input.starts_with("type "))
+        {
             handleType(input);
             continue;
         }
 
-        if (input == "pwd") {
+        if (input == "pwd")
+        {
             handlePwd();
             continue;
         }
 
-        if (input.starts_with("cd ")) {
+        if (input.starts_with("cd "))
+        {
             handleCd(input);
             continue;
         }
