@@ -24,7 +24,7 @@ vector<string> get_path(const string& input){
             while(view[end] != '\''){
                 end++;
             }
-            paths.push_back(s.substr(i,end-i));
+            paths.push_back(view.substr(i,end-i));
             i = end;
         }
     }
