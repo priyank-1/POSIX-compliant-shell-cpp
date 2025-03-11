@@ -10,18 +10,33 @@
 // #include <pwd.h> // For getting home directory
 using namespace std;
 // Built-in commands
-std::unordered_set<std::string> builtins = {"echo", "exit", "type", "pwd", "cd"};
+std::unordered_set<std::string> builtins = {"echo", "exit", "type", "pwd", "cd", "cat"};
 
 // Function to handle `echo` command
 void handleEcho(const std::string& input) {
     std::string_view view = input;
-    if(view.size() > 5 && view.substr(5).starts_with("'")){
-        int start = 6 , end = start;
-        while(end < view.size() && view[end] != '\'') ++end;
-       if(end < view.size()){
-        cout << view.substr(start,end-start) <<'\n';
-        return;
-       }
+    if(view.size() > 5){
+
+        if(view.substr(5).starts_with("'")){
+            int start = 6 , end = start;
+            while(end < view.size() && view[end] != '\'') ++end;
+           if(end < view.size()){
+            cout << view.substr(start,end-start) <<'\n';
+            return;
+           }
+        }
+        else if(view.size() > 5){
+          int start = 6, end = start;
+          cout << "\"" ;
+          while(end < view.size()){
+                while(end < view.size() && view[end] != ' ') end++;
+                cout << view.substr(start,end-start) << ' ';
+                while(end < view.size() && view[end] == ' ') end++;
+                start = end;
+            }
+          cout << "\"" << '\n';
+    }
+
     }
     std::cout << std::string_view(input).substr(5) << '\n';
 }
