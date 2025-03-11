@@ -13,35 +13,48 @@ using namespace std;
 std::unordered_set<std::string> builtins = {"echo", "exit", "type", "pwd", "cd", "cat"};
 
 // Function to handle `echo` command
-void handleEcho(const std::string& input) {
+void handleEcho(const std::string &input)
+{
     std::string_view view = input;
-    int i = 5; // Start after "echo "
+    int i = 5;
     bool firstWord = true;
 
-    while (i < view.size()) {
-        // Skip leading spaces
-        while (i < view.size() && view[i] == ' ') i++;
+    while (i < view.size())
+    {
 
-        if (i >= view.size()) break; // No more words
+        while (i < view.size() && view[i] == ' ')
+            i++;
 
-        // Handle quoted strings
-        if (view[i] == '\'') {
-            int start = ++i;
-            while (i < view.size() && view[i] != '\'') i++;
-            
-            if (i < view.size()) { // Found closing quote
-                if (!firstWord) std::cout << ' ';
-                std::cout << view.substr(start, i - start);
-                firstWord = false;
-                i++; // Move past closing quote
+        if (i >= view.size())
+            break;
+
+        if (view[i] == '\'')
+        {
+            std::string result;
+            while (i < view.size() && view[i] == '\'')
+            {
+                int start = ++i;
+                while (i < view.size() && view[i] != '\'')
+                    i++;
+                result += view.substr(start, i - start);
+                if (i < view.size())
+                    i++;
             }
-        } 
-        // Handle unquoted words
-        else {
-            int start = i;
-            while (i < view.size() && view[i] != ' ') i++;
 
-            if (!firstWord) std::cout << ' ';
+            if (!firstWord)
+                std::cout << ' ';
+            std::cout << result;
+            firstWord = false;
+        }
+        // Handle unquoted words
+        else
+        {
+            int start = i;
+            while (i < view.size() && view[i] != ' ')
+                i++;
+
+            if (!firstWord)
+                std::cout << ' ';
             std::cout << view.substr(start, i - start);
             firstWord = false;
         }
