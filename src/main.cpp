@@ -15,34 +15,39 @@ std::unordered_set<std::string> builtins = {"echo", "exit", "type", "pwd", "cd",
 // Function to handle `echo` command
 void handleEcho(const std::string& input) {
     std::string_view view = input;
+    int i = 5; // Start after "echo "
+    bool firstWord = true;
 
-    if (view.size() > 5) {
-        if (view.substr(5).starts_with("'")) {  // Handling single-quoted input
-            int start = 6, end = start;
-            while (end < view.size() && view[end] != '\'') ++end;
+    while (i < view.size()) {
+        // Skip leading spaces
+        while (i < view.size() && view[i] == ' ') i++;
 
-            if (end < view.size()) {  // If closing quote exists
-                std::cout << view.substr(start, end - start) << '\n';
-                return;
-            }
-        } else {  // Handling normal space-separated words
-            int start = 5, end = start;
-            bool firstWord = true;
+        if (i >= view.size()) break; // No more words
 
-            while (end < view.size()) {
-                while (end < view.size() && view[end] != ' ') end++;  // Find word end
-                
-                if (!firstWord) std::cout << ' ';  // Ensure single space between words
-                std::cout << view.substr(start, end - start);
-
-                while (end < view.size() && view[end] == ' ') end++;  // Skip extra spaces
-                start = end;
+        // Handle quoted strings
+        if (view[i] == '\'') {
+            int start = ++i;
+            while (i < view.size() && view[i] != '\'') i++;
+            
+            if (i < view.size()) { // Found closing quote
+                if (!firstWord) std::cout << ' ';
+                std::cout << view.substr(start, i - start);
                 firstWord = false;
+                i++; // Move past closing quote
             }
-            std::cout << '\n';  // Print newline after processing
-            return;
+        } 
+        // Handle unquoted words
+        else {
+            int start = i;
+            while (i < view.size() && view[i] != ' ') i++;
+
+            if (!firstWord) std::cout << ' ';
+            std::cout << view.substr(start, i - start);
+            firstWord = false;
         }
     }
+
+    std::cout << '\n';
 }
 
 // Function to handle `pwd` command
